@@ -1,1 +1,95 @@
-
+graph TB
+    subgraph "User Interface Layer"
+        A[Web App Frontend]
+        B[Mobile App]
+        C[Chat Interface]
+    end
+    
+    subgraph "API Gateway Layer"
+        D[API Gateway<br/>Authentication & Rate Limiting]
+    end
+    
+    subgraph "AI Agent Orchestration Layer"
+        E[Orchestrator Service]
+        F[Project Classifier Agent]
+        G[Jurisdiction Router Agent]
+        H[Document Generator Agent]
+        I[Workflow Advisor Agent]
+        J[Form Parser Agent]
+    end
+    
+    subgraph "Core Services"
+        K[Permit Discovery Engine]
+        L[Form Auto-Fill Engine]
+        M[Submission Manager]
+        N[Document Storage Service]
+        O[Notification Service]
+        P[Payment Processor]
+    end
+    
+    subgraph "Data Layer"
+        Q[(Permit Database<br/>Requirements by Jurisdiction)]
+        R[(User Data & Projects)]
+        S[(Form Templates<br/>& Mappings)]
+        T[(Submission History)]
+        U[Vector Database<br/>Regulatory Text Search]
+    end
+    
+    subgraph "External Services"
+        V[Claude API<br/>LLM Processing]
+        W[Municipal APIs<br/>where available]
+        X[Web Scraping Service<br/>Form Fetcher]
+        Y[Address Validation<br/>Google Maps API]
+        Z[Payment Gateway<br/>Stripe]
+    end
+    
+    subgraph "Background Jobs"
+        AA[Form Update Crawler]
+        AB[Regulation Monitor]
+        AC[Status Checker]
+    end
+    
+    A --> D
+    B --> D
+    C --> D
+    
+    D --> E
+    
+    E --> F
+    E --> G
+    E --> H
+    E --> I
+    E --> J
+    
+    F --> K
+    G --> K
+    H --> L
+    I --> K
+    J --> L
+    
+    K --> Q
+    K --> S
+    L --> S
+    L --> N
+    M --> W
+    M --> T
+    
+    K --> V
+    L --> V
+    F --> V
+    G --> V
+    H --> V
+    
+    K --> Y
+    M --> Z
+    O --> R
+    P --> Z
+    
+    AA --> X
+    AA --> S
+    AB --> Q
+    AC --> W
+    
+    K --> U
+    L --> R
+    M --> R
