@@ -20,6 +20,10 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
         .animate-spin {
             animation: spin 1s linear infinite;
         }
@@ -29,11 +33,17 @@
         .animate-fade-in {
             animation: fade-in 0.5s ease-out;
         }
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
         .delay-100 {
             animation-delay: 0.1s;
         }
         .delay-200 {
             animation-delay: 0.2s;
+        }
+        .delay-300 {
+            animation-delay: 0.3s;
         }
     </style>
 </head>
@@ -43,82 +53,142 @@
     <script type="text/babel">
         const { useState } = React;
         
-        // Lucide React icons as inline SVG components
+        // Icon components (condensed for brevity)
         const Building2 = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
         );
         
         const MapPin = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
         );
         
         const FileText = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
         );
         
         const AlertCircle = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         );
         
         const CheckCircle = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         );
         
         const Clock = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         );
         
         const DollarSign = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         );
         
-        const Lock = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-        );
-        
         const Sparkles = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
         );
         
         const Moon = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
         );
         
         const Sun = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
         );
 
-        const PermitProDemo = () => {
-            const [step, setStep] = useState('intro');
-            const [projectType, setProjectType] = useState('');
-            const [showResults, setShowResults] = useState(false);
-            const [selectedForm, setSelectedForm] = useState(null);
-            const [darkMode, setDarkMode] = useState(false);
+        const User = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+        );
 
-            // Demo data with obviously fake information
+        const Users = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+        );
+
+        const Plus = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+        );
+
+        const BarChart = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+        );
+
+        const Settings = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        );
+
+        const PermitProDemo = () => {
+            const [screen, setScreen] = useState('login');
+            const [accountType, setAccountType] = useState('homeowner');
+            const [projectType, setProjectType] = useState('');
+            const [darkMode, setDarkMode] = useState(false);
+            const [formFields, setFormFields] = useState({});
+            const [autoFillProgress, setAutoFillProgress] = useState(0);
+
+            const demoUserData = {
+                homeowner: {
+                    name: 'Sarah Johnson',
+                    email: 'sarah.johnson@email.com',
+                    phone: '(555) 123-4567',
+                    address: '123 Demo Street',
+                    city: 'Demo City',
+                    state: 'ST',
+                    zip: '12345',
+                    projects: [
+                        { name: 'Deck Project', status: 'In Progress', date: '2024-01-15' },
+                        { name: 'Bathroom Remodel', status: 'Approved', date: '2023-12-01' }
+                    ]
+                },
+                enterprise: {
+                    name: 'BuildCo Construction',
+                    email: 'permits@buildco.com',
+                    phone: '(555) 987-6543',
+                    address: '456 Business Ave',
+                    city: 'Demo City',
+                    state: 'ST',
+                    zip: '12345',
+                    projects: [
+                        { name: 'Oak Street Apartments', status: 'Under Review', date: '2024-02-01' },
+                        { name: 'Main St Commercial', status: 'Approved', date: '2024-01-20' },
+                        { name: 'Riverside Condos', status: 'In Progress', date: '2024-01-10' },
+                        { name: 'Downtown Office', status: 'Submitted', date: '2024-02-15' }
+                    ],
+                    team: 12,
+                    monthlyPermits: 24
+                }
+            };
+
+            const currentUser = demoUserData[accountType];
+
             const demoProjects = [
                 { id: 'deck', label: '🏡 Build a Deck', description: '12x16 wooden deck' },
                 { id: 'bathroom', label: '🚿 Bathroom Remodel', description: 'Full renovation' },
@@ -129,350 +199,371 @@
             const demoResults = {
                 deck: {
                     permits: [
-                        { 
-                            name: 'Building Permit - Deck Construction',
-                            fee: '$125.00',
-                            time: '3-5 business days',
-                            required: true,
-                            forms: ['Application Form A-101', 'Site Plan Worksheet']
-                        },
-                        {
-                            name: 'Zoning Compliance Review',
-                            fee: '$50.00',
-                            time: '2-3 business days',
-                            required: true,
-                            forms: ['Zoning Checklist Z-200']
-                        }
+                        { name: 'Building Permit - Deck Construction', fee: '$125.00', time: '3-5 business days' },
+                        { name: 'Zoning Compliance Review', fee: '$50.00', time: '2-3 business days' }
                     ],
                     totalCost: '$175.00',
-                    totalTime: '5-8 business days',
-                    inspections: ['Foundation', 'Framing', 'Final']
+                    totalTime: '5-8 business days'
                 },
                 bathroom: {
                     permits: [
-                        { 
-                            name: 'Building Permit - Interior Alteration',
-                            fee: '$200.00',
-                            time: '5-7 business days',
-                            required: true,
-                            forms: ['Application Form A-102']
-                        },
-                        {
-                            name: 'Plumbing Permit',
-                            fee: '$85.00',
-                            time: '3-4 business days',
-                            required: true,
-                            forms: ['Plumbing Application P-300']
-                        },
-                        {
-                            name: 'Electrical Permit',
-                            fee: '$65.00',
-                            time: '3-4 business days',
-                            required: true,
-                            forms: ['Electrical Application E-400']
-                        }
+                        { name: 'Building Permit - Interior Alteration', fee: '$200.00', time: '5-7 business days' },
+                        { name: 'Plumbing Permit', fee: '$85.00', time: '3-4 business days' },
+                        { name: 'Electrical Permit', fee: '$65.00', time: '3-4 business days' }
                     ],
                     totalCost: '$350.00',
-                    totalTime: '7-10 business days',
-                    inspections: ['Rough Plumbing', 'Rough Electrical', 'Final']
+                    totalTime: '7-10 business days'
                 },
                 fence: {
                     permits: [
-                        { 
-                            name: 'Zoning Permit - Fence Installation',
-                            fee: '$75.00',
-                            time: '2-3 business days',
-                            required: true,
-                            forms: ['Fence Permit Application F-500']
-                        }
+                        { name: 'Zoning Permit - Fence Installation', fee: '$75.00', time: '2-3 business days' }
                     ],
                     totalCost: '$75.00',
-                    totalTime: '2-3 business days',
-                    inspections: ['Final']
+                    totalTime: '2-3 business days'
                 },
                 solar: {
                     permits: [
-                        { 
-                            name: 'Building Permit - Solar Installation',
-                            fee: '$250.00',
-                            time: '7-10 business days',
-                            required: true,
-                            forms: ['Solar Application S-600']
-                        },
-                        {
-                            name: 'Electrical Permit - Solar PV System',
-                            fee: '$150.00',
-                            time: '5-7 business days',
-                            required: true,
-                            forms: ['Solar Electrical Form SE-601']
-                        },
-                        {
-                            name: 'Structural Review',
-                            fee: '$100.00',
-                            time: '5-7 business days',
-                            required: true,
-                            forms: ['Structural Assessment SR-602']
-                        }
+                        { name: 'Building Permit - Solar Installation', fee: '$250.00', time: '7-10 business days' },
+                        { name: 'Electrical Permit - Solar PV System', fee: '$150.00', time: '5-7 business days' },
+                        { name: 'Structural Review', fee: '$100.00', time: '5-7 business days' }
                     ],
                     totalCost: '$500.00',
-                    totalTime: '10-14 business days',
-                    inspections: ['Structural', 'Electrical Rough-in', 'Final Electrical', 'Final Building']
+                    totalTime: '10-14 business days'
                 }
             };
 
-            const getRelatedCodes = (projectType) => {
-                const codesByProject = {
-                    deck: [
-                        {
-                            title: 'Deck Construction Standards',
-                            code: 'IBC Section R507',
-                            description: 'Covers structural requirements for exterior decks including joist spacing, beam sizing, and connection methods.'
-                        },
-                        {
-                            title: 'Guardrail and Handrail Requirements',
-                            code: 'IBC Section R312',
-                            description: 'Specifies minimum guardrail heights (36") and maximum opening sizes (4") for elevated decks.'
-                        },
-                        {
-                            title: 'Footing and Foundation Requirements',
-                            code: 'IBC Section R403',
-                            description: 'Details frost depth requirements and footing specifications for deck support posts.'
-                        },
-                        {
-                            title: 'Ledger Board Attachment',
-                            code: 'IBC Section R507.2.3',
-                            description: 'Specifies proper methods for attaching deck ledgers to house structures including fastener spacing.'
-                        }
-                    ],
-                    bathroom: [
-                        {
-                            title: 'Plumbing Fixture Clearances',
-                            code: 'IPC Section 405',
-                            description: 'Minimum clearances required around toilets, sinks, and showers for accessibility and functionality.'
-                        },
-                        {
-                            title: 'Ventilation Requirements',
-                            code: 'IRC Section M1507',
-                            description: 'Exhaust fan requirements for bathrooms including minimum CFM ratings and duct specifications.'
-                        },
-                        {
-                            title: 'GFCI Protection',
-                            code: 'NEC Section 210.8',
-                            description: 'All bathroom receptacles must be GFCI protected within 6 feet of water sources.'
-                        },
-                        {
-                            title: 'Water-Resistant Materials',
-                            code: 'IBC Section R702.4',
-                            description: 'Requirements for water-resistant drywall and backing materials in wet areas.'
-                        },
-                        {
-                            title: 'Drain and Trap Requirements',
-                            code: 'IPC Section 1002',
-                            description: 'Proper P-trap installation and drain sizing for bathroom fixtures.'
-                        }
-                    ],
-                    fence: [
-                        {
-                            title: 'Fence Height Limitations',
-                            code: 'Zoning Code 15.24.040',
-                            description: 'Maximum fence heights: 6 feet for rear/side yards, 4 feet for front yards in residential zones.'
-                        },
-                        {
-                            title: 'Setback Requirements',
-                            code: 'Zoning Code 15.24.045',
-                            description: 'Fences must be set back minimum 2 feet from property lines unless on boundary with neighbor agreement.'
-                        },
-                        {
-                            title: 'Corner Lot Visibility',
-                            code: 'Zoning Code 15.24.050',
-                            description: 'Height restrictions near intersections to maintain sight distance triangles for traffic safety.'
-                        },
-                        {
-                            title: 'Pool Enclosure Standards',
-                            code: 'IBC Section AG105',
-                            description: 'If enclosing a pool, fences must be minimum 4 feet high with self-closing, self-latching gates.'
-                        }
-                    ],
-                    solar: [
-                        {
-                            title: 'Roof Load Capacity',
-                            code: 'IBC Section 1607',
-                            description: 'Structural analysis required to ensure roof can support additional dead load of solar panel system.'
-                        },
-                        {
-                            title: 'Fire Setback Requirements',
-                            code: 'IFC Section 605.11',
-                            description: 'Solar panels must maintain 36" pathways for firefighter access on residential roofs.'
-                        },
-                        {
-                            title: 'Electrical Disconnects',
-                            code: 'NEC Article 690',
-                            description: 'Required disconnect switches, grounding, and overcurrent protection for PV systems.'
-                        },
-                        {
-                            title: 'Rapid Shutdown Systems',
-                            code: 'NEC Section 690.12',
-                            description: 'Solar systems must have rapid shutdown capability to de-energize conductors during emergencies.'
-                        },
-                        {
-                            title: 'Wind and Seismic Loads',
-                            code: 'IBC Section 1609',
-                            description: 'Panel mounting systems must be engineered for local wind speeds and seismic activity.'
-                        }
-                    ]
-                };
-
-                return codesByProject[projectType] || [];
+            const handleLogin = (type) => {
+                setAccountType(type);
+                setTimeout(() => setScreen('dashboard'), 800);
             };
 
             const handleProjectSelect = (type) => {
                 setProjectType(type);
-                setStep('processing');
-                
-                // Simulate AI processing
-                setTimeout(() => {
-                    setShowResults(true);
-                    setStep('results');
-                }, 2000);
+                setScreen('processing');
+                setTimeout(() => setScreen('results'), 2000);
             };
 
-            const handleFormPreview = (formName) => {
-                setSelectedForm(formName);
+            const handleStartForm = () => {
+                setScreen('form-fill');
+                setFormFields({});
+                setAutoFillProgress(0);
+                setTimeout(() => simulateAutoFill(), 500);
+            };
+
+            const simulateAutoFill = () => {
+                const fields = [
+                    { name: 'applicantName', value: currentUser.name, delay: 500 },
+                    { name: 'email', value: currentUser.email, delay: 800 },
+                    { name: 'phone', value: currentUser.phone, delay: 1100 },
+                    { name: 'address', value: currentUser.address, delay: 1400 },
+                    { name: 'city', value: currentUser.city, delay: 1700 },
+                    { name: 'state', value: currentUser.state, delay: 2000 },
+                    { name: 'zip', value: currentUser.zip, delay: 2300 },
+                    { name: 'projectDescription', value: `${projectType === 'deck' ? '12x16 pressure-treated wooden deck, 2 feet off ground, attached to rear of house' : 'Project details auto-filled from AI analysis'}`, delay: 2600 }
+                ];
+
+                fields.forEach((field, index) => {
+                    setTimeout(() => {
+                        setFormFields(prev => ({ ...prev, [field.name]: field.value }));
+                        setAutoFillProgress(((index + 1) / fields.length) * 100);
+                    }, field.delay);
+                });
             };
 
             const results = projectType ? demoResults[projectType] : null;
 
             return (
                 <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
-                    {/* Dark Mode Toggle Button */}
-                    <button
-                        onClick={() => setDarkMode(!darkMode)}
-                        className={`fixed top-20 right-6 z-50 p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
-                            darkMode 
-                                ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' 
-                                : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                        aria-label="Toggle dark mode"
-                    >
-                        {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                    </button>
+                    {/* Dark Mode Toggle */}
+                    {screen !== 'login' && (
+                        <button
+                            onClick={() => setDarkMode(!darkMode)}
+                            className={`fixed top-20 right-6 z-50 p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
+                                darkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50'
+                            }`}
+                        >
+                            {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                        </button>
+                    )}
 
-                    {/* Header with Demo Warning */}
-                    <div className={`${darkMode ? 'bg-gradient-to-r from-indigo-900 to-purple-900' : 'bg-gradient-to-r from-indigo-600 to-purple-600'} text-white py-4 px-6 shadow-lg`}>
-                        <div className="max-w-6xl mx-auto flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Building2 className="w-8 h-8" />
-                                <div>
-                                    <h1 className="text-2xl font-bold">PermitPro</h1>
-                                    <p className="text-sm text-indigo-100">AI-Powered Permit Discovery</p>
+                    {/* Header */}
+                    {screen !== 'login' && (
+                        <>
+                            <div className={`${darkMode ? 'bg-gradient-to-r from-indigo-900 to-purple-900' : 'bg-gradient-to-r from-indigo-600 to-purple-600'} text-white py-4 px-6 shadow-lg`}>
+                                <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <Building2 className="w-8 h-8" />
+                                        <div>
+                                            <h1 className="text-2xl font-bold">PermitPro</h1>
+                                            <p className="text-sm text-indigo-100">AI-Powered Permit Discovery</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 flex-wrap">
+                                        {/* Account Type Toggle */}
+                                        <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1">
+                                            <button
+                                                onClick={() => setAccountType('homeowner')}
+                                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
+                                                    accountType === 'homeowner' ? 'bg-white text-indigo-600' : 'text-white hover:bg-white/10'
+                                                }`}
+                                            >
+                                                <User className="w-4 h-4 inline mr-1" />
+                                                Homeowner
+                                            </button>
+                                            <button
+                                                onClick={() => setAccountType('enterprise')}
+                                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
+                                                    accountType === 'enterprise' ? 'bg-white text-indigo-600' : 'text-white hover:bg-white/10'
+                                                }`}
+                                            >
+                                                <Users className="w-4 h-4 inline mr-1" />
+                                                Enterprise
+                                            </button>
+                                        </div>
+                                        <div className="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
+                                            <Sparkles className="w-5 h-5" />
+                                            DEMO
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
-                                <Sparkles className="w-5 h-5" />
-                                DEMO MODE
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Demo Notice Banner */}
-                    <div className={`${darkMode ? 'bg-yellow-900 border-yellow-700' : 'bg-yellow-50 border-yellow-200'} border-y py-3 px-6`}>
-                        <div className="max-w-6xl mx-auto flex items-start gap-3">
-                            <AlertCircle className={`w-5 h-5 ${darkMode ? 'text-yellow-400' : 'text-yellow-600'} mt-0.5 flex-shrink-0`} />
-                            <div className={`text-sm ${darkMode ? 'text-yellow-100' : 'text-yellow-800'}`}>
-                                <strong>Demo Version:</strong> This is a demonstration using fictional data from "Demo City, ST". 
-                                Results are for illustrative purposes only and cannot be used for actual permit applications. 
-                                <span className="font-semibold"> Upgrade to access real permit data for your jurisdiction.</span>
+                            <div className={`${darkMode ? 'bg-yellow-900 border-yellow-700' : 'bg-yellow-50 border-yellow-200'} border-y py-3 px-6`}>
+                                <div className="max-w-6xl mx-auto flex items-start gap-3">
+                                    <AlertCircle className={`w-5 h-5 ${darkMode ? 'text-yellow-400' : 'text-yellow-600'} mt-0.5 flex-shrink-0`} />
+                                    <div className={`text-sm ${darkMode ? 'text-yellow-100' : 'text-yellow-800'}`}>
+                                        <strong>Demo Version:</strong> Viewing as <strong>{currentUser.name}</strong> ({accountType} account). 
+                                        Use the toggle above to switch between account types.
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </>
+                    )}
 
                     <div className="max-w-6xl mx-auto py-12 px-6">
-                        {/* Intro Step */}
-                        {step === 'intro' && (
-                            <div className="space-y-8">
-                                <div className="text-center space-y-4">
-                                    <h2 className={`text-4xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                        Get Your Permits in Minutes, Not Days
-                                    </h2>
-                                    <p className={`text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-                                        Our AI analyzes your project and automatically discovers required permits, 
-                                        fills out forms, and guides you through the approval process.
-                                    </p>
-                                </div>
-
-                                {/* Demo Location */}
-                                <div className={`${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'} rounded-xl shadow-lg p-6 max-w-md mx-auto border-2 border-dashed`}>
-                                    <div className={`flex items-center gap-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>
-                                        <MapPin className="w-5 h-5" />
-                                        <span className="text-sm font-medium">Demo Location</span>
+                        {/* LOGIN SCREEN */}
+                        {screen === 'login' && (
+                            <div className="min-h-screen flex items-center justify-center animate-fade-in">
+                                <div className={`max-w-md w-full ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl p-8`}>
+                                    <div className="text-center mb-8">
+                                        <div className="flex items-center justify-center gap-3 mb-4">
+                                            <Building2 className={`w-12 h-12 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
+                                        </div>
+                                        <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+                                            Welcome to PermitPro
+                                        </h1>
+                                        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            Choose your account type to explore the demo
+                                        </p>
                                     </div>
-                                    <p className={`text-lg font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                                        123 Demo Street, Demo City, ST 12345
-                                    </p>
-                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
-                                        (Fictional address for demonstration purposes)
-                                    </p>
-                                </div>
 
-                                {/* Project Selection */}
-                                <div className="space-y-4">
-                                    <h3 className={`text-2xl font-semibold text-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                        Choose a Demo Project
-                                    </h3>
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        {demoProjects.map((project) => (
-                                            <button
-                                                key={project.id}
-                                                onClick={() => handleProjectSelect(project.id)}
-                                                className={`${darkMode ? 'bg-gray-800 border-gray-700 hover:border-indigo-400' : 'bg-white hover:border-indigo-500'} rounded-xl p-6 shadow-md hover:shadow-xl transition-all border-2 border-transparent text-left group`}
-                                            >
-                                                <div className="text-4xl mb-3">{project.label.split(' ')[0]}</div>
-                                                <h4 className={`text-xl font-semibold ${darkMode ? 'text-gray-100 group-hover:text-indigo-400' : 'text-gray-800 group-hover:text-indigo-600'} transition-colors`}>
-                                                    {project.label.substring(2)}
-                                                </h4>
-                                                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>{project.description}</p>
-                                                <div className={`mt-4 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'} font-medium flex items-center gap-2`}>
-                                                    Try Demo →
+                                    <div className="space-y-4">
+                                        <button
+                                            onClick={() => handleLogin('homeowner')}
+                                            className={`w-full ${darkMode ? 'bg-gray-700 hover:bg-gray-600 border-gray-600' : 'bg-white hover:bg-gray-50 border-gray-300'} border-2 rounded-xl p-6 text-left transition-all hover:shadow-lg group`}
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div className={`p-3 ${darkMode ? 'bg-indigo-900' : 'bg-indigo-100'} rounded-lg`}>
+                                                    <User className={`w-8 h-8 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
                                                 </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className={`text-lg font-semibold ${darkMode ? 'text-white group-hover:text-indigo-400' : 'text-gray-900 group-hover:text-indigo-600'} mb-1`}>
+                                                        Homeowner / Single Contractor
+                                                    </h3>
+                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Perfect for DIY projects and individual contractors managing a few permits at a time
+                                                    </p>
+                                                    <div className={`mt-3 flex items-center gap-2 text-sm ${darkMode ? 'text-indigo-400' : 'text-indigo-600'} font-medium`}>
+                                                        Try Homeowner Demo →
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </button>
 
-                                {/* Features Preview */}
-                                <div className={`mt-12 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-8`}>
-                                    <h3 className={`text-2xl font-bold text-center mb-8 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                        What You'll See in Full Version
-                                    </h3>
-                                    <div className="grid md:grid-cols-3 gap-6">
-                                        <div className="text-center space-y-3">
-                                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                                                <CheckCircle className="w-6 h-6 text-green-600" />
+                                        <button
+                                            onClick={() => handleLogin('enterprise')}
+                                            className={`w-full ${darkMode ? 'bg-gray-700 hover:bg-gray-600 border-gray-600' : 'bg-white hover:bg-gray-50 border-gray-300'} border-2 rounded-xl p-6 text-left transition-all hover:shadow-lg group`}
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div className={`p-3 ${darkMode ? 'bg-purple-900' : 'bg-purple-100'} rounded-lg`}>
+                                                    <Users className={`w-8 h-8 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className={`text-lg font-semibold ${darkMode ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-600'} mb-1`}>
+                                                        Enterprise / Construction Company
+                                                    </h3>
+                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Designed for businesses managing multiple projects, teams, and high-volume permit workflows
+                                                    </p>
+                                                    <div className={`mt-3 flex items-center gap-2 text-sm ${darkMode ? 'text-purple-400' : 'text-purple-600'} font-medium`}>
+                                                        Try Enterprise Demo →
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <h4 className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>Smart Discovery</h4>
-                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>AI identifies all required permits for your exact location</p>
-                                        </div>
-                                        <div className="text-center space-y-3">
-                                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                                                <FileText className="w-6 h-6 text-blue-600" />
-                                            </div>
-                                            <h4 className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>Auto-Fill Forms</h4>
-                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Automatically populate permit applications with your project details</p>
-                                        </div>
-                                        <div className="text-center space-y-3">
-                                            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
-                                                <Clock className="w-6 h-6 text-purple-600" />
-                                            </div>
-                                            <h4 className={`font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>Track Status</h4>
-                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Real-time updates on your permit application progress</p>
-                                        </div>
+                                        </button>
+                                    </div>
+
+                                    <div className={`mt-8 pt-6 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                        <p className={`text-center text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            This is a demo with fictional data.<br/>
+                                            <span className="font-semibold">No real account required.</span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* Processing Step */}
-                        {step === 'processing' && (
+                        {/* DASHBOARD SCREEN */}
+                        {screen === 'dashboard' && (
+                            <div className="space-y-6 animate-fade-in">
+                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6`}>
+                                    <div className="flex items-center justify-between flex-wrap gap-4">
+                                        <div>
+                                            <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+                                                Welcome back, {currentUser.name}!
+                                            </h2>
+                                            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                {accountType === 'homeowner' ? 'Ready to start your next project?' : 'Manage your team\'s permits and track project progress'}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => setScreen('project-select')}
+                                            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                            New Project
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {accountType === 'enterprise' && (
+                                    <div className="grid md:grid-cols-4 gap-4">
+                                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow p-4`}>
+                                            <div className="flex items-center gap-3">
+                                                <BarChart className={`w-8 h-8 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
+                                                <div>
+                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>This Month</p>
+                                                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{currentUser.monthlyPermits}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow p-4`}>
+                                            <div className="flex items-center gap-3">
+                                                <Users className="w-8 h-8 text-green-600" />
+                                                <div>
+                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Team Members</p>
+                                                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{currentUser.team}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow p-4`}>
+                                            <div className="flex items-center gap-3">
+                                                <CheckCircle className="w-8 h-8 text-blue-600" />
+                                                <div>
+                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Approved</p>
+                                                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>18</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow p-4`}>
+                                            <div className="flex items-center gap-3">
+                                                <Clock className="w-8 h-8 text-orange-600" />
+                                                <div>
+                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pending</p>
+                                                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>6</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6`}>
+                                    <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+                                        {accountType === 'homeowner' ? 'My Projects' : 'Recent Projects'}
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {currentUser.projects.map((project, idx) => (
+                                            <div key={idx} className={`flex items-center justify-between p-4 ${darkMode ? 'bg-gray-700 hover:bg-gray-650' : 'bg-gray-50 hover:bg-gray-100'} rounded-lg transition-colors flex-wrap gap-3`}>
+                                                <div className="flex items-center gap-4">
+                                                    <FileText className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+                                                    <div>
+                                                        <p className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{project.name}</p>
+                                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{project.date}</p>
+                                                    </div>
+                                                </div>
+                                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                    project.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                                                    project.status === 'In Progress' ? 'bg-blue-100 text-blue-800' : 
+                                                    'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                    {project.status}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    <button className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} rounded-xl shadow p-6 text-left transition-all`}>
+                                        <FileText className={`w-8 h-8 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'} mb-3`} />
+                                        <h4 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>View All Projects</h4>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>See complete project history</p>
+                                    </button>
+                                    <button className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} rounded-xl shadow p-6 text-left transition-all`}>
+                                        <Settings className={`w-8 h-8 ${darkMode ? 'text-purple-400' : 'text-purple-600'} mb-3`} />
+                                        <h4 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>Account Settings</h4>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Manage your profile</p>
+                                    </button>
+                                    <button className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} rounded-xl shadow p-6 text-left transition-all`}>
+                                        <BarChart className={`w-8 h-8 ${darkMode ? 'text-green-400' : 'text-green-600'} mb-3`} />
+                                        <h4 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>Analytics</h4>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>View insights & reports</p>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PROJECT SELECT SCREEN */}
+                        {screen === 'project-select' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="text-center space-y-4">
+                                    <h2 className={`text-4xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        What are you building?
+                                    </h2>
+                                    <p className={`text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
+                                        Tell us about your project and we'll identify all required permits
+                                    </p>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {demoProjects.map((project) => (
+                                        <button
+                                            key={project.id}
+                                            onClick={() => handleProjectSelect(project.id)}
+                                            className={`${darkMode ? 'bg-gray-800 border-gray-700 hover:border-indigo-400' : 'bg-white hover:border-indigo-500'} rounded-xl p-6 shadow-md hover:shadow-xl transition-all border-2 border-transparent text-left group`}
+                                        >
+                                            <div className="text-4xl mb-3">{project.label.split(' ')[0]}</div>
+                                            <h4 className={`text-xl font-semibold ${darkMode ? 'text-gray-100 group-hover:text-indigo-400' : 'text-gray-800 group-hover:text-indigo-600'} transition-colors`}>
+                                                {project.label.substring(2)}
+                                            </h4>
+                                            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>{project.description}</p>
+                                            <div className={`mt-4 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'} font-medium`}>
+                                                Start Project →
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="text-center">
+                                    <button onClick={() => setScreen('dashboard')} className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} font-medium`}>
+                                        ← Back to Dashboard
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PROCESSING SCREEN */}
+                        {screen === 'processing' && (
                             <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
                                 <div className="relative">
                                     <div className={`w-24 h-24 border-8 ${darkMode ? 'border-indigo-800 border-t-indigo-400' : 'border-indigo-200 border-t-indigo-600'} rounded-full animate-spin`}></div>
@@ -487,10 +578,22 @@
                             </div>
                         )}
 
-                        {/* Results Step */}
-                        {step === 'results' && results && (
+                        {/* RESULTS SCREEN */}
+                        {screen === 'results' && results && (
                             <div className="space-y-6 animate-fade-in">
-                                {/* Summary Cards */}
+                                <div className="flex items-center justify-between flex-wrap gap-4">
+                                    <h2 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        Permit Requirements
+                                    </h2>
+                                    <button
+                                        onClick={handleStartForm}
+                                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+                                    >
+                                        <Sparkles className="w-5 h-5" />
+                                        Start Application
+                                    </button>
+                                </div>
+
                                 <div className="grid md:grid-cols-3 gap-4">
                                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg`}>
                                         <div className="flex items-center gap-3 mb-2">
@@ -515,29 +618,17 @@
                                     </div>
                                 </div>
 
-                                {/* Permits List */}
                                 <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6`}>
                                     <h3 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Required Permits</h3>
                                     <div className="space-y-4">
                                         {results.permits.map((permit, idx) => (
-                                            <div key={idx} className={`border ${darkMode ? 'border-gray-700 hover:border-indigo-500' : 'border-gray-200 hover:border-indigo-300'} rounded-lg p-4 transition-colors`}>
+                                            <div key={idx} className={`border ${darkMode ? 'border-gray-700' : 'border-gray-200'} rounded-lg p-4`}>
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
                                                         <h4 className={`font-semibold text-lg ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{permit.name}</h4>
                                                         <div className={`flex gap-6 mt-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                                             <span>💰 Fee: {permit.fee}</span>
                                                             <span>⏱️ Processing: {permit.time}</span>
-                                                        </div>
-                                                        <div className="mt-2 flex flex-wrap gap-2">
-                                                            {permit.forms.map((form, formIdx) => (
-                                                                <button
-                                                                    key={formIdx}
-                                                                    onClick={() => handleFormPreview(form)}
-                                                                    className={`text-xs ${darkMode ? 'bg-indigo-900 text-indigo-300 hover:bg-indigo-800' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'} px-3 py-1 rounded-full transition-colors`}
-                                                                >
-                                                                    📄 {form}
-                                                                </button>
-                                                            ))}
                                                         </div>
                                                     </div>
                                                     <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -547,128 +638,107 @@
                                     </div>
                                 </div>
 
-                                {/* Inspection Schedule */}
-                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6`}>
-                                    <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Inspection Schedule</h3>
-                                    <div className="flex flex-wrap gap-3">
-                                        {results.inspections.map((inspection, idx) => (
-                                            <div key={idx} className={`${darkMode ? 'bg-gradient-to-r from-purple-900 to-indigo-900 border-indigo-700' : 'bg-gradient-to-r from-purple-50 to-indigo-50 border-indigo-200'} px-4 py-2 rounded-lg border`}>
-                                                <span className={`text-sm font-medium ${darkMode ? 'text-indigo-200' : 'text-indigo-900'}`}>
-                                                    {idx + 1}. {inspection}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Related Building Codes */}
-                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6`}>
-                                    <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Related Building Codes to Review</h3>
-                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-                                        We've identified relevant building codes for your project. Review these before starting construction.
-                                    </p>
-                                    <div className="space-y-3">
-                                        {getRelatedCodes(projectType).map((code, idx) => (
-                                            <div key={idx} className={`flex items-start gap-3 p-4 ${darkMode ? 'bg-gray-700 hover:bg-gray-650 border-gray-600' : 'bg-gray-50 hover:bg-gray-100 border-gray-200'} rounded-lg transition-colors border`}>
-                                                <div className={`w-8 h-8 ${darkMode ? 'bg-indigo-900' : 'bg-indigo-100'} rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                                                    <FileText className={`w-4 h-4 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-1`}>{code.title}</h4>
-                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{code.description}</p>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`text-xs ${darkMode ? 'bg-indigo-900 text-indigo-300' : 'bg-indigo-100 text-indigo-700'} px-2 py-1 rounded`}>
-                                                            {code.code}
-                                                        </span>
-                                                        <button className={`text-xs ${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} font-medium flex items-center gap-1`}>
-                                                            View Code Details →
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className={`mt-4 p-4 ${darkMode ? 'bg-yellow-900 border-yellow-700' : 'bg-yellow-50 border-yellow-200'} border rounded-lg flex items-start gap-3`}>
-                                        <AlertCircle className={`w-5 h-5 ${darkMode ? 'text-yellow-400' : 'text-yellow-600'} flex-shrink-0 mt-0.5`} />
-                                        <div className={`text-sm ${darkMode ? 'text-yellow-100' : 'text-yellow-800'}`}>
-                                            <strong>Demo Note:</strong> Code references are simplified for demonstration. 
-                                            The full version provides complete code sections, interpretations, and jurisdiction-specific requirements.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Locked Form Preview */}
-                                {selectedForm && (
-                                    <div className={`${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-300'} rounded-xl shadow-lg p-6 border-2 border-dashed`}>
-                                        <div className="flex items-start gap-4">
-                                            <Lock className={`w-8 h-8 ${darkMode ? 'text-gray-500' : 'text-gray-400'} flex-shrink-0`} />
-                                            <div className="flex-1">
-                                                <h4 className={`text-xl font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>{selectedForm}</h4>
-                                                <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-100'} rounded-lg p-6 space-y-3`}>
-                                                    <div className="space-y-2">
-                                                        <div className={`h-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded w-1/4`}></div>
-                                                        <div className={`h-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-200'} rounded blur-sm`}></div>
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <div className={`h-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded w-1/3`}></div>
-                                                        <div className={`h-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-200'} rounded blur-sm`}></div>
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <div className={`h-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded w-1/2`}></div>
-                                                        <div className={`h-8 ${darkMode ? 'bg-gray-800' : 'bg-gray-200'} rounded blur-sm`}></div>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-4 text-center">
-                                                    <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
-                                                        <strong>Form preview locked in demo mode.</strong><br/>
-                                                        Upgrade to access real forms with AI auto-fill capabilities.
-                                                    </p>
-                                                    <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
-                                                        Unlock Full Access →
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* CTA Section */}
-                                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-xl p-8 text-white text-center">
-                                    <h3 className="text-3xl font-bold mb-4">Ready for Real Permits?</h3>
-                                    <p className="text-lg text-indigo-100 mb-6 max-w-2xl mx-auto">
-                                        This demo shows just a glimpse. Get access to real permit data for your jurisdiction, 
-                                        AI-powered form filling, and automatic submission capabilities.
-                                    </p>
-                                    <div className="flex gap-4 justify-center flex-wrap">
-                                        <button className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
-                                            Start Free Trial
-                                        </button>
-                                        <button className="bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-800 transition-all">
-                                            View Pricing
-                                        </button>
-                                    </div>
-                                    <div className="mt-6 flex items-center justify-center gap-6 text-sm text-indigo-100 flex-wrap">
-                                        <span>✓ Real jurisdiction data</span>
-                                        <span>✓ Auto-fill forms</span>
-                                        <span>✓ Direct submission</span>
-                                        <span>✓ Status tracking</span>
-                                    </div>
-                                </div>
-
-                                {/* Try Another */}
-                                <div className="text-center">
-                                    <button
-                                        onClick={() => {
-                                            setStep('intro');
-                                            setProjectType('');
-                                            setShowResults(false);
-                                            setSelectedForm(null);
-                                        }}
-                                        className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} font-medium`}
-                                    >
-                                        ← Try Another Demo Project
+                                <div className="flex gap-4">
+                                    <button onClick={() => setScreen('dashboard')} className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} font-medium`}>
+                                        ← Back to Dashboard
+                                    </button>
+                                    <button onClick={() => setScreen('project-select')} className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} font-medium`}>
+                                        Try Another Project
                                     </button>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* FORM FILL SCREEN */}
+                        {screen === 'form-fill' && (
+                            <div className="space-y-6 animate-fade-in">
+                                <div className="flex items-center justify-between flex-wrap gap-4">
+                                    <div>
+                                        <h2 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                            Building Permit Application
+                                        </h2>
+                                        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-2`}>
+                                            Watch as AI automatically fills your application
+                                        </p>
+                                    </div>
+                                    {autoFillProgress === 100 && <CheckCircle className="w-12 h-12 text-green-600" />}
+                                </div>
+
+                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6`}>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Auto-Fill Progress</span>
+                                        <span className={`text-sm font-bold ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>{Math.round(autoFillProgress)}%</span>
+                                    </div>
+                                    <div className={`w-full ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-3`}>
+                                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 h-3 rounded-full transition-all duration-500" style={{ width: `${autoFillProgress}%` }} />
+                                    </div>
+                                    {autoFillProgress === 100 && (
+                                        <p className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'} mt-2 flex items-center gap-2`}>
+                                            <CheckCircle className="w-4 h-4" />
+                                            Auto-fill complete! Review and submit below.
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6`}>
+                                    <div className="space-y-4">
+                                        <div className="animate-slide-in">
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Applicant Name *</label>
+                                            <input type="text" value={formFields.applicantName || ''} readOnly className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium`} />
+                                        </div>
+
+                                        <div className="animate-slide-in delay-100">
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Email Address *</label>
+                                            <input type="email" value={formFields.email || ''} readOnly className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium`} />
+                                        </div>
+
+                                        <div className="animate-slide-in delay-200">
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Phone Number *</label>
+                                            <input type="tel" value={formFields.phone || ''} readOnly className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium`} />
+                                        </div>
+
+                                        <div className="animate-slide-in delay-300">
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Property Address *</label>
+                                            <input type="text" value={formFields.address || ''} readOnly className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium mb-3`} />
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <input type="text" placeholder="City" value={formFields.city || ''} readOnly className={`px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium`} />
+                                                <input type="text" placeholder="State" value={formFields.state || ''} readOnly className={`px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium`} />
+                                                <input type="text" placeholder="ZIP" value={formFields.zip || ''} readOnly className={`px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium`} />
+                                            </div>
+                                        </div>
+
+                                        <div className="animate-slide-in delay-300">
+                                            <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Project Description *</label>
+                                            <textarea value={formFields.projectDescription || ''} readOnly rows={3} className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg font-medium`} />
+                                        </div>
+                                    </div>
+
+                                    {autoFillProgress === 100 && (
+                                        <div className="mt-6 flex gap-4 flex-wrap">
+                                            <button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
+                                                Submit Application
+                                            </button>
+                                            <button className={`px-6 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} rounded-lg font-semibold transition-all`}>
+                                                Save Draft
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className={`${darkMode ? 'bg-indigo-900 border-indigo-700' : 'bg-indigo-50 border-indigo-200'} border rounded-xl p-4 flex items-start gap-3`}>
+                                    <Sparkles className={`w-5 h-5 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'} flex-shrink-0 mt-0.5`} />
+                                    <div>
+                                        <p className={`font-semibold ${darkMode ? 'text-indigo-200' : 'text-indigo-900'} mb-1`}>AI Auto-Fill in Action</p>
+                                        <p className={`text-sm ${darkMode ? 'text-indigo-300' : 'text-indigo-700'}`}>
+                                            Our AI extracted your information from your profile and project details, automatically filling all required fields. 
+                                            In the full version, you can edit any field before submitting.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button onClick={() => setScreen('results')} className={`${darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'} font-medium`}>
+                                    ← Back to Results
+                                </button>
                             </div>
                         )}
                     </div>
@@ -676,7 +746,6 @@
             );
         };
 
-        // Render the app
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<PermitProDemo />);
     </script>
