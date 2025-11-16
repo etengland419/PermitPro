@@ -1,0 +1,173 @@
+graph TD
+    subgraph "User Input"
+        A[User Describes Project<br/>'Build 12x16 deck']
+        B[Provides Address<br/>'123 Main St, Austin, TX']
+    end
+
+    subgraph "Address Resolution"
+        C[Geocoding Service<br/>Google Maps API]
+        D[Jurisdiction Lookup<br/>PostGIS Query]
+        E[Jurisdiction Data<br/>City of Austin]
+    end
+
+    subgraph "Project Classification"
+        F[LLM Analysis<br/>Claude API]
+        G[Extract Features<br/>project_type: deck<br/>square_footage: 192<br/>height: 2ft<br/>attached: true]
+        H[Risk Assessment<br/>risk_level: low<br/>structural: true]
+    end
+
+    subgraph "Permit Discovery"
+        I[Rule Engine<br/>SQL Query]
+        J[Vector Search<br/>Building Code Embeddings]
+        K[LLM Matching<br/>Edge Cases]
+        L[Hybrid Results<br/>Merge & Dedupe]
+    end
+
+    subgraph "Permit Requirements"
+        M[Required Permits<br/>1. Building Permit<br/>2. Zoning Review]
+        N[Fee Calculation<br/>$125 + $50 = $175]
+        O[Timeline Estimate<br/>5-8 business days]
+        P[Building Codes<br/>IBC R507, R312]
+    end
+
+    subgraph "Form Retrieval"
+        Q{Forms<br/>Cached?}
+        R[Cache Hit<br/>PostgreSQL]
+        S[Web Scraper<br/>Municipal Website]
+        T[Form Parser<br/>PDF Field Extraction]
+        U[Form Structure<br/>JSONB Schema]
+    end
+
+    subgraph "Auto-Fill"
+        V[Field Mapping<br/>LLM + Rules]
+        W[User Profile Data<br/>name, email, phone]
+        X[Project Data<br/>address, details]
+        Y[Data Validation<br/>Format & Rules]
+        Z[Filled Form<br/>+ Confidence Scores]
+    end
+
+    subgraph "User Review"
+        AA[Display Results<br/>Web UI]
+        AB{User<br/>Action?}
+        AC[Edit/Complete<br/>Missing Fields]
+        AD[Save Draft]
+        AE[Submit Application]
+    end
+
+    subgraph "Submission Processing"
+        AF{Submission<br/>Method?}
+        AG[Online Portal<br/>Direct API]
+        AH[PDF Generation<br/>Print-Ready]
+        AI[Email Submission<br/>SMTP]
+        AJ[Track Status<br/>Polling/Webhooks]
+    end
+
+    subgraph "Payment Processing"
+        AK[Stripe Checkout<br/>Session Created]
+        AL[Payment Successful]
+        AM[Receipt Generation]
+        AN[Update Database<br/>submission.status]
+    end
+
+    subgraph "Monitoring & Tracking"
+        AO[Status Updates<br/>Municipality APIs]
+        AP[Notification Service<br/>Email/SMS/Push]
+        AQ[User Dashboard<br/>Real-time Status]
+    end
+
+    subgraph "Data Storage"
+        AR[(PostgreSQL<br/>Projects, Permits,<br/>Submissions)]
+        AS[(S3<br/>Documents,<br/>Generated PDFs)]
+        AT[(Redis<br/>Cache<br/>Sessions)]
+        AU[(Pinecone<br/>Vector DB<br/>Embeddings)]
+    end
+
+    %% Flow connections
+    A --> F
+    B --> C
+    C --> D
+    D --> E
+
+    E --> I
+    F --> G
+    G --> H
+    H --> I
+
+    I --> L
+    E --> J
+    J --> L
+    H --> K
+    K --> L
+
+    L --> M
+    M --> N
+    M --> O
+    M --> P
+
+    M --> Q
+    Q -->|Yes| R
+    Q -->|No| S
+    S --> T
+    T --> U
+    R --> U
+
+    U --> V
+    V --> W
+    V --> X
+    W --> Y
+    X --> Y
+    Y --> Z
+
+    M --> AA
+    N --> AA
+    O --> AA
+    P --> AA
+    Z --> AA
+
+    AA --> AB
+    AB -->|Edit| AC
+    AB -->|Save| AD
+    AB -->|Submit| AE
+
+    AC --> AA
+    AD --> AR
+    AE --> AK
+
+    AK --> AL
+    AL --> AM
+    AM --> AN
+    AN --> AF
+
+    AF -->|Online| AG
+    AF -->|PDF| AH
+    AF -->|Email| AI
+
+    AG --> AJ
+    AH --> AS
+    AI --> AJ
+
+    AJ --> AO
+    AO --> AP
+    AP --> AQ
+
+    %% Data storage connections
+    I -.Query.-> AR
+    V -.Query.-> AR
+    AD -.Write.-> AR
+    AN -.Write.-> AR
+
+    J -.Search.-> AU
+    Q -.Check.-> AT
+    R -.Read.-> AR
+    T -.Cache.-> AR
+
+    AH -.Upload.-> AS
+
+    style F fill:#FFAD00
+    style K fill:#FFAD00
+    style V fill:#FFAD00
+    style AR fill:#3B48CC
+    style AS fill:#569A31
+    style AT fill:#DC382C
+    style AU fill:#8B4513
+    style AK fill:#635BFF
