@@ -1,0 +1,81 @@
+graph TD
+    Start([User Lands on Platform]) --> A{User Type?}
+    
+    A -->|New User| B[Sign Up / Quick Start]
+    A -->|Returning User| C[Login]
+    
+    B --> D[Project Intake Chat]
+    C --> D
+    
+    D --> E["AI: What are you building/renovating?"]
+    E --> F[User describes project<br/>e.g., 'Adding a 12x16 deck']
+    
+    F --> G["AI: Smart Questions<br/>- Address?<br/>- Materials?<br/>- Attached to house?<br/>- Height off ground?"]
+    
+    G --> H[User provides details]
+    
+    H --> I[AI analyzes location<br/>& project scope]
+    
+    I --> J{Project Complexity}
+    
+    J -->|Simple| K[AI: You'll need Building Permit]
+    J -->|Moderate| L[AI: You'll need Building + Electrical]
+    J -->|Complex| M[AI: You'll need Multiple Permits<br/>+ Professional Review Recommended]
+    
+    K --> N[Show Permit Summary Card]
+    L --> N
+    M --> N
+    
+    N --> O[Display:<br/>- Required permits list<br/>- Estimated timeline<br/>- Fees breakdown<br/>- Required documents]
+    
+    O --> P{User Action}
+    
+    P -->|Start Application| Q[Guided Form Filling]
+    P -->|Save for Later| R[Save to Dashboard]
+    P -->|Get Quote for Pro Help| S[Connect with Contractor]
+    
+    Q --> T[AI Pre-fills form with<br/>project info]
+    
+    T --> U[Show form with<br/>highlighted required fields]
+    
+    U --> V[User reviews & completes<br/>missing information]
+    
+    V --> W[Upload supporting docs<br/>- Site plans<br/>- Photos<br/>- Contractor license]
+    
+    W --> X[AI validates completeness]
+    
+    X --> Y{Complete?}
+    
+    Y -->|No| Z[Highlight missing items]
+    Z --> V
+    
+    Y -->|Yes| AA[Review & Preview]
+    
+    AA --> AB{Submission Method}
+    
+    AB -->|E-Filing Available| AC[Calculate fees]
+    AB -->|Manual Only| AD[Generate PDF packet]
+    
+    AC --> AE[Payment processing]
+    AE --> AF[Auto-submit to municipality]
+    AF --> AG[Confirmation & tracking number]
+    
+    AD --> AH[Download instructions<br/>+ completed forms]
+    AH --> AI[Provide submission address<br/>& hours]
+    
+    AG --> AJ[Dashboard tracking]
+    AI --> AJ
+    
+    AJ --> AK[Monitor status]
+    
+    AK --> AL{Status Updates}
+    
+    AL -->|Approved| AM[Notify user<br/>Show next steps]
+    AL -->|More Info Needed| AN[Alert user<br/>Show what's needed]
+    AL -->|Inspection Required| AO[Schedule inspection link]
+    
+    AM --> AP[Inspection workflow]
+    AN --> AQ[Resubmission flow]
+    AO --> AP
+    
+    AP --> AR([Project Complete])
