@@ -1,0 +1,322 @@
+erDiagram
+    %% User Management
+    users ||--o{ user_addresses : "has"
+    users ||--|| subscriptions : "has"
+    users ||--o{ projects : "creates"
+    users ||--o{ documents : "uploads"
+    users ||--o{ notifications : "receives"
+    users ||--o{ api_keys : "owns"
+    users ||--o{ payments : "makes"
+
+    %% Projects & Permits
+    projects ||--o{ permits : "requires"
+    projects ||--o{ filled_forms : "has"
+    projects ||--o{ submissions : "has"
+    projects ||--o{ documents : "contains"
+    projects }o--|| user_addresses : "located_at"
+    projects }o--|| jurisdictions : "governed_by"
+
+    %% Permits & Requirements
+    permits }o--|| permit_requirements : "based_on"
+    permits ||--o{ permit_building_codes : "references"
+    permit_requirements }o--|| jurisdictions : "defined_by"
+
+    %% Forms
+    form_templates }o--|| jurisdictions : "for"
+    filled_forms }o--|| form_templates : "uses"
+    filled_forms }o--|| permits : "for"
+    filled_forms }o--|| projects : "belongs_to"
+
+    %% Submissions
+    submissions }o--|| projects : "for"
+    submissions }o--|| permits : "for"
+    submissions }o--|| filled_forms : "contains"
+    submissions ||--o{ submission_status_history : "has_history"
+    submissions ||--o{ inspections : "requires"
+    submissions ||--o{ payments : "payment_for"
+
+    %% Building Codes
+    building_codes ||--o{ permit_building_codes : "referenced_in"
+    building_codes }o--o| jurisdictions : "specific_to"
+
+    %% Payments
+    payments }o--|| users : "from"
+    payments }o--o| submissions : "for"
+
+    %% Audit
+    audit_logs }o--o| users : "performed_by"
+
+    users {
+        uuid id PK
+        varchar email UK
+        varchar password_hash
+        varchar name
+        varchar account_type
+        varchar company
+        varchar phone
+        boolean email_verified
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    user_addresses {
+        uuid id PK
+        uuid user_id FK
+        varchar label
+        varchar street
+        varchar city
+        varchar state
+        varchar zip
+        decimal latitude
+        decimal longitude
+        geography geog
+        boolean is_primary
+        varchar parcel_id
+        timestamp created_at
+    }
+
+    subscriptions {
+        uuid id PK
+        uuid user_id FK,UK
+        varchar plan
+        varchar status
+        varchar stripe_customer_id
+        varchar stripe_subscription_id
+        timestamp current_period_start
+        timestamp current_period_end
+        boolean cancel_at_period_end
+        timestamp created_at
+    }
+
+    projects {
+        uuid id PK
+        uuid user_id FK
+        varchar name
+        text description
+        varchar project_type
+        uuid address_id FK
+        jsonb details
+        jsonb classification
+        varchar status
+        decimal estimated_value
+        date estimated_start_date
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    jurisdictions {
+        uuid id PK
+        varchar name
+        varchar level
+        varchar state
+        geography boundary
+        varchar contact_phone
+        varchar contact_email
+        varchar website_url
+        boolean supports_online_submission
+        jsonb business_hours
+        jsonb metadata
+        timestamp created_at
+    }
+
+    permit_requirements {
+        uuid id PK
+        uuid jurisdiction_id FK
+        varchar permit_type
+        varchar permit_name
+        text description
+        decimal base_fee
+        text fee_calculation_formula
+        integer processing_time_min_days
+        integer processing_time_max_days
+        jsonb conditions
+        jsonb exemptions
+        jsonb required_documents
+        boolean active
+        date effective_date
+        timestamp created_at
+    }
+
+    permits {
+        uuid id PK
+        uuid project_id FK
+        uuid requirement_id FK
+        varchar permit_type
+        varchar permit_name
+        boolean required
+        decimal fee
+        varchar processing_time
+        text reasoning
+        jsonb triggers
+        varchar discovery_method
+        decimal confidence_score
+        timestamp created_at
+    }
+
+    building_codes {
+        uuid id PK
+        varchar code_reference
+        varchar title
+        text description
+        varchar code_type
+        uuid jurisdiction_id FK
+        text full_text
+        jsonb requirements
+        date effective_date
+        varchar version
+        timestamp created_at
+    }
+
+    permit_building_codes {
+        uuid permit_id PK,FK
+        uuid building_code_id PK,FK
+        decimal relevance_score
+        timestamp created_at
+    }
+
+    form_templates {
+        uuid id PK
+        uuid jurisdiction_id FK
+        varchar permit_type
+        varchar form_name
+        varchar form_type
+        varchar form_url
+        varchar pdf_url
+        varchar online_portal_url
+        jsonb form_structure
+        text raw_content
+        varchar version
+        timestamp last_verified_at
+        timestamp created_at
+    }
+
+    filled_forms {
+        uuid id PK
+        uuid project_id FK
+        uuid permit_id FK
+        uuid form_template_id FK
+        jsonb filled_data
+        jsonb confidence_scores
+        jsonb missing_fields
+        jsonb validation_results
+        boolean ready_to_submit
+        timestamp created_at
+    }
+
+    submissions {
+        uuid id PK
+        uuid project_id FK
+        uuid permit_id FK
+        uuid filled_form_id FK
+        varchar status
+        varchar tracking_number
+        varchar submission_method
+        timestamp submitted_at
+        timestamp reviewed_at
+        timestamp approved_at
+        text rejection_reason
+        text municipality_notes
+        timestamp created_at
+    }
+
+    submission_status_history {
+        uuid id PK
+        uuid submission_id FK
+        varchar old_status
+        varchar new_status
+        text message
+        varchar changed_by
+        jsonb metadata
+        timestamp created_at
+    }
+
+    documents {
+        uuid id PK
+        uuid project_id FK
+        uuid user_id FK
+        varchar file_name
+        varchar file_type
+        bigint file_size_bytes
+        varchar document_type
+        varchar s3_bucket
+        varchar s3_key
+        varchar s3_url
+        varchar thumbnail_url
+        timestamp uploaded_at
+        timestamp deleted_at
+    }
+
+    inspections {
+        uuid id PK
+        uuid submission_id FK
+        varchar inspection_type
+        date scheduled_date
+        time scheduled_time
+        varchar inspector_name
+        varchar inspector_phone
+        varchar status
+        text result
+        text notes
+        timestamp completed_at
+        timestamp created_at
+    }
+
+    payments {
+        uuid id PK
+        uuid user_id FK
+        uuid submission_id FK
+        decimal amount
+        varchar currency
+        varchar payment_type
+        varchar status
+        varchar stripe_payment_intent_id
+        varchar stripe_charge_id
+        varchar payment_method_last4
+        varchar payment_method_brand
+        varchar receipt_url
+        timestamp created_at
+    }
+
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        uuid project_id FK
+        uuid submission_id FK
+        varchar type
+        varchar title
+        text message
+        boolean read
+        timestamp read_at
+        boolean sent_via_email
+        boolean sent_via_sms
+        jsonb metadata
+        timestamp created_at
+    }
+
+    api_keys {
+        uuid id PK
+        uuid user_id FK
+        varchar key_hash
+        varchar key_prefix
+        varchar name
+        jsonb scopes
+        timestamp last_used_at
+        timestamp expires_at
+        boolean revoked
+        timestamp created_at
+    }
+
+    audit_logs {
+        uuid id PK
+        uuid user_id FK
+        varchar action
+        varchar entity_type
+        uuid entity_id
+        inet ip_address
+        text user_agent
+        uuid request_id
+        jsonb metadata
+        timestamp created_at
+    }

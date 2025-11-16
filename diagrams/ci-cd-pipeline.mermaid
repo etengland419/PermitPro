@@ -1,0 +1,106 @@
+graph LR
+    subgraph "Developer Workflow"
+        A[Developer<br/>Writes Code] --> B[Commit to<br/>Feature Branch]
+        B --> C[Push to GitHub]
+    end
+
+    subgraph "Continuous Integration - GitHub Actions"
+        C --> D[Trigger CI Pipeline]
+
+        D --> E1[Lint & Format<br/>ESLint, Prettier]
+        D --> E2[Type Check<br/>TypeScript]
+        D --> E3[Unit Tests<br/>Jest, Vitest]
+        D --> E4[Security Scan<br/>Snyk, npm audit]
+
+        E1 --> F{All Checks<br/>Pass?}
+        E2 --> F
+        E3 --> F
+        E4 --> F
+
+        F -->|No| G[Fail Build<br/>Notify Developer]
+        F -->|Yes| H[Build Docker<br/>Images]
+
+        H --> I[Integration Tests<br/>API Tests]
+        I --> J[E2E Tests<br/>Playwright]
+    end
+
+    subgraph "Code Review"
+        J --> K[Create/Update<br/>Pull Request]
+        K --> L[Code Review<br/>Required: 1 Approval]
+        L --> M{Approved?}
+        M -->|No| N[Request Changes]
+        N --> A
+    end
+
+    subgraph "Continuous Deployment - Staging"
+        M -->|Yes| O[Merge to Main]
+        O --> P[Auto-Deploy<br/>to Staging]
+
+        P --> Q1[Deploy Frontend<br/>to S3 + CloudFront]
+        P --> Q2[Deploy API<br/>to ECS Fargate]
+        P --> Q3[Run DB Migrations<br/>Flyway]
+
+        Q1 --> R[Smoke Tests<br/>Critical Paths]
+        Q2 --> R
+        Q3 --> R
+
+        R --> S{Tests Pass?}
+        S -->|No| T[Rollback<br/>Notify Team]
+        S -->|Yes| U[Staging Ready<br/>Notify QA]
+    end
+
+    subgraph "QA & Approval"
+        U --> V[QA Testing<br/>Manual + Automated]
+        V --> W{QA Approved?}
+        W -->|No| X[Create Bug Tickets]
+        X --> A
+    end
+
+    subgraph "Production Deployment"
+        W -->|Yes| Y[Tag Release<br/>vX.Y.Z]
+        Y --> Z[Manual Approval<br/>Required for Prod]
+
+        Z --> AA{Approved?}
+        AA -->|No| AB[Deployment Cancelled]
+        AA -->|Yes| AC[Deploy to Production]
+
+        AC --> AD1[Blue-Green Deployment<br/>Frontend CDN]
+        AC --> AD2[Rolling Update<br/>API Containers]
+        AC --> AD3[DB Migration<br/>Zero Downtime]
+
+        AD1 --> AE[Health Checks<br/>Monitor 5 Minutes]
+        AD2 --> AE
+        AD3 --> AE
+
+        AE --> AF{Healthy?}
+        AF -->|No| AG[Auto Rollback<br/>Alert On-Call]
+        AF -->|Yes| AH[Complete Deployment<br/>Update Status Page]
+    end
+
+    subgraph "Post-Deployment"
+        AH --> AI[Monitor Metrics<br/>DataDog Dashboard]
+        AI --> AJ[Check Error Rates<br/>Sentry]
+        AJ --> AK[Verify User Impact<br/>Analytics]
+        AK --> AL[Deployment Complete<br/>Notify Stakeholders]
+    end
+
+    subgraph "Monitoring & Alerts"
+        AM[DataDog Monitors]
+        AN[Sentry Alerts]
+        AO[PagerDuty]
+
+        AG -.Alert.-> AO
+        T -.Alert.-> AO
+        AI -.Metrics.-> AM
+        AJ -.Errors.-> AN
+        AM -.Critical.-> AO
+        AN -.Critical.-> AO
+    end
+
+    style C fill:#24292e
+    style D fill:#2088FF
+    style P fill:#FFA500
+    style AC fill:#DC382C
+    style AH fill:#28A745
+    style AG fill:#D73A49
+    style T fill:#D73A49

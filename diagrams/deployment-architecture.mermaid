@@ -1,0 +1,140 @@
+graph TB
+    subgraph "User Layer"
+        A[Web Browsers]
+        B[Mobile Apps<br/>iOS/Android]
+        C[API Clients]
+    end
+
+    subgraph "CDN Layer - CloudFront"
+        D[CloudFront CDN<br/>Global Edge Locations]
+    end
+
+    subgraph "Load Balancing - AWS"
+        E[Application Load Balancer<br/>Multi-AZ]
+    end
+
+    subgraph "Application Layer - EC2 Auto Scaling"
+        F1[Web Server 1<br/>Node.js + React]
+        F2[Web Server 2<br/>Node.js + React]
+        F3[Web Server 3<br/>Node.js + React]
+    end
+
+    subgraph "API Layer - ECS Fargate"
+        G1[API Container 1<br/>Node.js + Express]
+        G2[API Container 2<br/>Node.js + Express]
+        G3[API Container 3<br/>Node.js + Express]
+    end
+
+    subgraph "Worker Layer - ECS Fargate"
+        H1[Background Workers<br/>Form Scraping]
+        H2[Background Workers<br/>PDF Processing]
+        H3[Background Workers<br/>Notifications]
+    end
+
+    subgraph "Cache Layer"
+        I[Redis ElastiCache<br/>Multi-AZ<br/>Session + Data Cache]
+    end
+
+    subgraph "Database Layer - RDS"
+        J1[(Primary PostgreSQL<br/>with PostGIS<br/>db.r5.xlarge)]
+        J2[(Read Replica 1<br/>PostgreSQL)]
+        J3[(Read Replica 2<br/>PostgreSQL)]
+    end
+
+    subgraph "Document Storage"
+        K[AWS S3 Buckets<br/>Versioning Enabled<br/>Encryption at Rest]
+    end
+
+    subgraph "Vector Database"
+        L[Pinecone<br/>Building Code Embeddings<br/>Regulatory Text Search]
+    end
+
+    subgraph "External Services"
+        M[Anthropic Claude API<br/>LLM Processing]
+        N[Google Maps API<br/>Geocoding]
+        O[Stripe API<br/>Payments]
+        P[Municipal APIs<br/>Direct Integrations]
+    end
+
+    subgraph "Monitoring & Logging"
+        Q[DataDog<br/>APM + Logs + Metrics]
+        R[AWS CloudWatch<br/>Infrastructure Monitoring]
+        S[Sentry<br/>Error Tracking]
+    end
+
+    subgraph "Queue Services"
+        T[AWS SQS<br/>Task Queue]
+        U[AWS SNS<br/>Event Notifications]
+    end
+
+    subgraph "Backup & DR"
+        V[AWS S3 Glacier<br/>Automated Backups]
+        W[Cross-Region Replication<br/>DR Site us-west-2]
+    end
+
+    %% Connections
+    A --> D
+    B --> D
+    C --> D
+    D --> E
+    E --> F1
+    E --> F2
+    E --> F3
+    F1 --> G1
+    F2 --> G2
+    F3 --> G3
+
+    G1 --> I
+    G2 --> I
+    G3 --> I
+
+    G1 --> J1
+    G2 --> J2
+    G3 --> J3
+    J1 -.Replication.-> J2
+    J1 -.Replication.-> J3
+
+    G1 --> K
+    G2 --> K
+    G3 --> K
+
+    G1 --> L
+    G2 --> L
+    G3 --> L
+
+    G1 --> M
+    G2 --> M
+    G3 --> M
+
+    G1 --> N
+    G1 --> O
+    G1 --> P
+
+    G1 --> T
+    G2 --> T
+    G3 --> T
+
+    T --> H1
+    T --> H2
+    T --> H3
+
+    H1 --> K
+    H2 --> K
+    H3 --> U
+
+    F1 -.Logs/Metrics.-> Q
+    G1 -.Logs/Metrics.-> Q
+    H1 -.Logs/Metrics.-> Q
+    F1 -.Errors.-> S
+
+    J1 -.Backup.-> V
+    K -.Backup.-> V
+    J1 -.DR Replication.-> W
+
+    style D fill:#FF9900
+    style E fill:#FF9900
+    style J1 fill:#3B48CC
+    style K fill:#569A31
+    style I fill:#DC382C
+    style M fill:#FFAD00
+    style Q fill:#632CA6
